@@ -31,7 +31,7 @@ public:
 	//leaf functions
 	bool isLeaf();
 	void makeLeaf();
-	void setLeaf(CalendarEvent* ev) { data = ev; key = ev->getStartTime(); }
+	void setLeaf(CalendarEvent* ev) { this->data = ev; this->key = ev->getStartTime(); }
 
 	//get functions
 	int getmin(int num)const;

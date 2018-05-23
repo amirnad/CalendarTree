@@ -313,14 +313,18 @@ Node* CalendarTree::Find(const treeKey &key, eTypeOfFind whichFind)const
 			case RegularFind:
 				if (curr->getKey() == key)//
 					return curr;
+				break;
 			case EventAt:
 				if (curr->getData()->isEventStillHappening(key))
 					return curr;
+				break;
 			case EventAfter:
 				if (curr->getKey() == key)
 					return curr;
 				else if (curr->getData()->isEventInRange(key) && curr->getNextBrother() != nullptr)
 					return curr->getNextBrother();
+				break;
+
 			}
 		}
 		else
@@ -423,32 +427,15 @@ CalendarEvent * CalendarTree::eventAfter(time_t startTime)
 	return requestedEvent;
 }
 
-CalendarEvent * CalendarTree::deleteFirst()
-{
-	CalendarEvent* firstEvent;
-
-	if (root == nullptr)
-	{
-		return nullptr;
-	}
-	else if (root->isLeaf())
-	{
-		firstEvent = root->getData();
-		delete root;
-		root = nullptr;
-	}
-	else
-	{
-		firstEvent = deleteHelper(root, nullptr);
-	}
-	return firstEvent;
-}
 
 bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 {
 	bool isLegal = false;
+	treeKey keyToInsert = eventToInsert->getStartTime();
 
-
-
+	if (Find(keyToInsert, EventAt) == nullptr)
+	{
+		isLegal = true;
+	}
 	return isLegal;
 }

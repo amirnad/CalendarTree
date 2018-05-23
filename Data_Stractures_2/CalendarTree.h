@@ -34,8 +34,8 @@ public:
 
 	CalendarEvent* eventAt(time_t startTime);
 	CalendarEvent* eventAfter(time_t startTime);
-	CalendarEvent* deleteFirst();
-	
+	CalendarEvent* deleteFirst() { return nullptr; }
+
 };
 
 #endif
