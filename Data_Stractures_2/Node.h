@@ -25,7 +25,7 @@ class Node
 	CalendarEvent* data;
 
 public:
-	Node(const treeKey &m1 = -1, const treeKey &m2 = -1, const treeKey &m3 = -1, Node *p = NULL, Node *l = NULL, Node *m = NULL, Node *r = NULL);
+	Node(const treeKey &_min1 = -1, const treeKey &_min2 = -1, const treeKey &_min3 = -1, Node *_parent = NULL, Node *_leftChild = NULL, Node *_middleChild = NULL, Node *_rightChild = NULL);
 	~Node();
 
 	//leaf functions
@@ -53,7 +53,8 @@ public:
 	void setMin3(const treeKey &m3) { min3 = m3; }
 	void setNextBrother(Node* nextBrother);
 	void setPrevBrother(Node* prevBrother);
-
+	Node* getNextBrother() { return nextBrother; }
+	Node* getPrevBrother() { return prevBrother; }
 
 	int checkNumOfChildren();
 	int whichAmI();
