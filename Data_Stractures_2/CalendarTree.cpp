@@ -306,27 +306,14 @@ Node* CalendarTree::Find(const treeKey &key, eTypeOfFind whichFind)const
 
 	while (curr != NULL)
 	{
-		if (curr->isLeaf())
-		{
-			switch (whichFind)
-			{
-			case RegularFind:
-				if (curr->getKey() == key)//
-					return curr;
-				break;
-			case EventAt:
-				if (curr->getData()->isEventStillHappening(key))
-					return curr;
-				break;
-			case EventAfter:
-				if (curr->getKey() == key)
-					return curr;
-				else if (curr->getData()->isEventInRange(key) && curr->getNextBrother() != nullptr)
-					return curr->getNextBrother();
-				break;
-
-			}
-		}
+		if (curr->isLeaf() && whichFind == RegularFind && curr->getKey() == key)
+			return curr;
+		else if (curr->isLeaf() && whichFind == EventAt && curr->getData()->isEventStillHappening(key))
+			return curr;
+		else if (curr->isLeaf() && whichFind == EventAfter && curr->getData()->isEventInRange(key) && curr->getKey() >= key)
+			return curr;
+		else if (curr->isLeaf() && whichFind == EventAfter && curr->getData()->isEventInRange(key) && curr->getNextBrother() != nullptr)
+			return curr->getNextBrother();
 		else
 		{
 			if (curr->checkNumOfChildren() == THREE_CHILD && key >= curr->getmin(THREE_CHILD))
@@ -402,7 +389,7 @@ void CalendarTree::printSorted()
 
 CalendarEvent* CalendarTree::eventAt(time_t startTime)
 {
-	Node* requestedLeaf = Find(startTime, EventAfter);
+	Node* requestedLeaf = Find(startTime, EventAt);
 	CalendarEvent* requestedEvent = nullptr;
 
 	if (requestedLeaf != NULL)
