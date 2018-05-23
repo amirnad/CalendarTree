@@ -13,7 +13,7 @@ class CalendarTree
 	list<Node> leafList;
 
 public:
-	CalendarTree(Node *root = NULL) :root(root) {}
+	CalendarTree(Node *root = nullptr) :root(root) {}
 	~CalendarTree();
 
 	void setRoot(Node* newRoot) { root = newRoot; }
@@ -24,18 +24,16 @@ public:
 	Node* divideNode(Node* p, Node *child);
 	void Delete(const treeKey &ID);
 	void deleteHelper(Node* p, Node* p_child);
-	Node* Find(const treeKey &_ID, eTypeOfFind whichFind)const;
+	Node* Find(const treeKey &_ID)const;
 	Node* findParent(const treeKey &ID)const;
 	void fixKeys(Node *node);
 	void freeTree(Node *delRoot);
-	void PlaceLeafsInList(Node* node);
 	void printSorted();
 	bool isInsertLegal(CalendarEvent* eventToInsert);
 
 	CalendarEvent* eventAt(time_t startTime);
 	CalendarEvent* eventAfter(time_t startTime);
 	CalendarEvent* deleteFirst() { return nullptr; }
-
 };
 
 #endif
