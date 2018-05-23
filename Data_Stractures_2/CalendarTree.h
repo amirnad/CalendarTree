@@ -6,7 +6,7 @@
 #include <list>
 
 using namespace std;
-
+enum eTypeOfFind { RegularFind = 1, EventAt, EventAfter };
 class CalendarTree
 {
 	Node *root;
@@ -24,7 +24,7 @@ public:
 	Node* divideNode(Node* p, Node *child);
 	void Delete(const treeKey &ID);
 	void deleteHelper(Node* p, Node* p_child);
-	Node* Find(const treeKey &_ID)const;
+	Node* Find(const treeKey &_ID, eTypeOfFind whichFind)const;
 	Node* findParent(const treeKey &ID)const;
 	void fixKeys(Node *node);
 	void freeTree(Node *delRoot);

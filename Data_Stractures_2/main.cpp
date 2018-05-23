@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 	int n;
 	const int BIG_TEST = 100000;
 	bool munchLine;
-
+	
 	while ((inst = cin.get()) != 'Q')
 	{
 	    munchLine = true;
