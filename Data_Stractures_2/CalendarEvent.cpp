@@ -11,8 +11,9 @@ void CalendarEvent::print()
 bool CalendarEvent::isEventStillHappening(time_t requestedTime)
 {
 	bool isHappening = false;
+	time_t currEventEndTime = startTime + duration;
 
-	if ((startTime + duration >= requestedTime) && (requestedTime + duration > startTime))
+	if (requestedTime >= startTime && requestedTime <= currEventEndTime)
 	{//there is already an event on this time
 		isHappening = true;
 	}
@@ -22,4 +23,15 @@ bool CalendarEvent::isEventStillHappening(time_t requestedTime)
 	}
 
 	return isHappening;
+}
+
+bool CalendarEvent::isEventInRange(time_t requestedTime)
+{
+	bool res = false;
+	time_t range = startTime + duration;
+	if (range > requestedTime)
+	{
+		res = true;
+	}
+	return res;
 }

@@ -34,7 +34,7 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 		{
 			root = newNodeToInsert;
 		}
-			
+
 		else if (root->isLeaf())
 		{
 			Node* newRoot;
@@ -44,14 +44,14 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 				newNodeToInsert->setNextBrother(root);
 				root->setPrevBrother(newNodeToInsert);
 			}
-				
+
 			else
 			{
 				newRoot = new Node(root->getKey(), newEventToInsert->getStartTime(), -1, NULL, root, newNodeToInsert, NULL);
 				newNodeToInsert->setNextBrother(newNodeToInsert);
 				root->setPrevBrother(root);
 			}
-				
+
 
 			newNodeToInsert->setParent(newRoot);
 			root->setParent(newRoot);
@@ -65,7 +65,7 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 
 		return ev;
 	}
-	
+
 }
 //recursive function to insert the the node to its right place in the CalendarTree
 void CalendarTree::insertHelper(Node* newNode, Node* newNodeParent)
@@ -262,7 +262,7 @@ void CalendarTree::deleteHelper(Node* currParent, Node* currChild)
 	}
 }
 //gets a key from the input and finds the node that holds it
-Node* CalendarTree::Find(const treeKey &key)const
+Node* CalendarTree::Find(const treeKey &key, eTypeOfFind whichFind)const
 {
 	Node* curr;
 
@@ -272,14 +272,29 @@ Node* CalendarTree::Find(const treeKey &key)const
 
 	while (curr != NULL)
 	{
-		if (curr->isLeaf() && curr->getKey() == key)
-			return curr;
+		if (curr->isLeaf())
+		{
+			switch (whichFind)
+			{
+			case RegularFind:
+				if (curr->getKey() == key)//
+					return curr;
+			case EventAt:
+				if (curr->getData()->isEventStillHappening(key))
+					return curr;
+			case EventAfter:
+				if (curr->getKey() == key)
+					return curr;
+				else if (curr->getData()->isEventInRange(key) && curr->getNextBrother() != nullptr)
+					return curr->getNextBrother();
+			}
+		}
 		else
 		{
-			if (curr->checkNumOfChildren() == THREE_CHILD && key >= curr->getmin(3))
+			if (curr->checkNumOfChildren() == THREE_CHILD && key >= curr->getmin(THREE_CHILD))
 				curr = curr->getRightChild();
 
-			else if (key >= curr->getmin(2))
+			else if (key >= curr->getmin(TWO_CHILD))
 				curr = curr->getMiddleChild();
 
 			else
@@ -349,23 +364,28 @@ void CalendarTree::printSorted()
 
 CalendarEvent* CalendarTree::eventAt(time_t startTime)
 {
-	Node* leaf = Find(startTime);
-	CalendarEvent* ev = nullptr;
+	Node* requestedLeaf = Find(startTime, EventAfter);
+	CalendarEvent* requestedEvent = nullptr;
 
-	if (leaf != nullptr && leaf->getData()->isEventStillHappening(startTime))
-		ev = leaf->getData();
-	return ev;
+	if (requestedLeaf != NULL)
+	{
+		requestedEvent = requestedLeaf->getData();
+	}
+
+	return requestedEvent;
 }
 
 CalendarEvent * CalendarTree::eventAfter(time_t startTime)
 {
-	Node* leaf = Find(startTime);
-	CalendarEvent* ev = nullptr;
+	Node* requestedLeaf = Find(startTime, EventAfter);
+	CalendarEvent* requestedEvent = nullptr;
 
-	if (leaf != nullptr && leaf->getNext() != nullptr)
-		ev = leaf->getNext()->getEvent();
-	
-	return ev;
+	if (requestedLeaf != NULL)
+	{
+		requestedEvent = requestedLeaf->getData();
+	}
+
+	return requestedEvent;
 }
 
 CalendarEvent * CalendarTree::deleteFirst()
