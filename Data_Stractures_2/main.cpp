@@ -23,7 +23,8 @@ using namespace std;
 *  INPUT:  the program reads from the standard input lines of the form
 *		<instruction> <instruction parameters>
 *        where <instruction> can be I(nsert), D(elete), F(ind), A(fter), N(umBefore), P(rintSorted), Q(uit)
-*		 and it is follows by appropriate parameters (e.g., time for Find)
+*		 and it is follows by appropriate parameters (e.g., time for 
+)
 *        as this is a test program, there is little care for unexpected inputs.
 *  OUTPUT:  the results of the operations are printed to stdout in readable form.
 */

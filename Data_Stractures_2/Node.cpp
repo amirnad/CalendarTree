@@ -1,7 +1,7 @@
 #include "Node.h"
 
-Node::Node(const treeKey &m1, const treeKey &m2, const treeKey &m3, Node *p, Node *l, Node *m, Node *r) :
-	leftChild(l), rightChild(r), middleChild(m), parent(p), min1(m1), min2(m2), min3(m3) {}
+Node::Node(const treeKey &_min1, const treeKey &_min2, const treeKey &_min3, Node *_parent, Node *_leftChild, Node *_middleChild, Node *_rightChild) :
+	leftChild(_leftChild), rightChild(_rightChild), middleChild(_middleChild), parent(_parent), min1(_min1), min2(_min2), min3(_min3) {}
 
 Node::~Node() {}
 //takes a node and makes it a leaf node
@@ -14,10 +14,18 @@ void Node::makeLeaf()
 //returns true if node is leaf , false if not
 bool Node::isLeaf()
 {
-	if (leftChild == NULL && middleChild == NULL && rightChild == NULL)
-		return true;
+	bool isLeaf = false;
+
+	if ((leftChild == NULL) && (middleChild == NULL) && (rightChild == NULL))
+	{
+		isLeaf = true;
+	}
 	else
-		return false;
+	{
+		isLeaf = false;
+	}
+	
+	return isLeaf;
 }
 //return the min that the user asked for
 int Node::getmin(int num)const
@@ -57,57 +65,67 @@ int Node::checkNumOfChildren()
 		return THREE_CHILD;
 }
 //puts a new node into a parents that holds only 2 children
-void Node::insertToTwoChildNode(Node *newChild)
+void Node::insertToTwoChildNode(Node *newChildToInsert)
 {
-	if (newChild->isLeaf()) //in case newChild is leaf node we only need to find its right place and insert it
+	if (newChildToInsert->isLeaf()) //in case newChild is leaf node we only need to find its right place and insert it
 	{
-		if (newChild->getKey() > min2) //updating the pointers and min values of the parent
+		if (newChildToInsert->getKey() > min2) //updating the pointers and min values of the parent
 		{
-			rightChild = newChild;
-			min3 = newChild->getKey();
+			rightChild = newChildToInsert;
+			newChildToInsert->setPrevBrother(middleChild);
+			newChildToInsert->setNextBrother(middleChild->getNextBrother());
+			min3 = newChildToInsert->getKey();
 		}
-		else if (newChild->getKey() > min1)
+		else if (newChildToInsert->getKey() > min1)
 		{
 			rightChild = middleChild;
-			middleChild = newChild;
+			middleChild = newChildToInsert;
 			min3 = min2;
-			min2 = newChild->getKey();
+			leftChild->setNextBrother(newChildToInsert);
+			newChildToInsert->setPrevBrother(leftChild);
+			newChildToInsert->setNextBrother(rightChild);
+			rightChild->setPrevBrother(newChildToInsert);
+			min2 = newChildToInsert->getKey();
 		}
 		else
 		{
 			rightChild = middleChild;
 			middleChild = leftChild;
-			leftChild = newChild;
+			leftChild = newChildToInsert;
+			newChildToInsert->setNextBrother(middleChild);
+			newChildToInsert->setPrevBrother(middleChild->getPrevBrother());
+			middleChild->setPrevBrother(newChildToInsert);
 			min3 = min2;
 			min2 = min1;
-			min1 = newChild->getKey();
+			min1 = newChildToInsert->getKey();
 		}
 	}
 	else //newChild is not a leaf but an internal node
 	{
-		if (newChild->getmin(1) < min1)
+		if (newChildToInsert->getmin(1) < min1)
 		{
 			rightChild = middleChild;
 			middleChild = leftChild;
-			leftChild = newChild;
+			leftChild = newChildToInsert;
 			min3 = min2;
 			min2 = min1;
-			min1 = newChild->getmin(1);
+			min1 = newChildToInsert->getmin(1);
+
 		}
-		else if (newChild->getmin(1) < min2)
+		else if (newChildToInsert->getmin(1) < min2)
 		{
 			rightChild = middleChild;
-			middleChild = newChild;
+			middleChild = newChildToInsert;
 			min3 = min2;
-			min2 = newChild->getmin(1);
+			min2 = newChildToInsert->getmin(1);
 		}
 		else
 		{
-			rightChild = newChild;
-			min3 = newChild->getmin(1);
+			rightChild = newChildToInsert;
+			min3 = newChildToInsert->getmin(1);
 		}
 	}
-	newChild->setParent(this);
+	newChildToInsert->setParent(this);
 }
 //if any changes were made to some children this function will update to their right parent 
 void Node::fixParent()

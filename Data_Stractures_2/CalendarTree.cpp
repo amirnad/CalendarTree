@@ -22,7 +22,7 @@ void CalendarTree::freeTree(Node *delRoot)
 //gets a key or data from the input and adds it to the right place in the 2-3 tree
 CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 {
-	Node* newNodeToInsert, *tempP;
+	Node* newNodeToInsert, *tempParent;
 	CalendarEvent* res = nullptr;
 
 	if (isInsertLegal(newEventToInsert))
@@ -30,11 +30,13 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 		newNodeToInsert = new Node;
 		newNodeToInsert->setLeaf(newEventToInsert);
 
+		//The tree is empty
 		if (root == NULL)
 		{
 			root = newNodeToInsert;
 		}
-			
+
+		//There is already one leaf
 		else if (root->isLeaf())
 		{
 			Node* newRoot;
@@ -44,14 +46,13 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 				newNodeToInsert->setNextBrother(root);
 				root->setPrevBrother(newNodeToInsert);
 			}
-				
+
 			else
 			{
 				newRoot = new Node(root->getKey(), newEventToInsert->getStartTime(), -1, NULL, root, newNodeToInsert, NULL);
 				newNodeToInsert->setNextBrother(newNodeToInsert);
 				root->setPrevBrother(root);
 			}
-				
 
 			newNodeToInsert->setParent(newRoot);
 			root->setParent(newRoot);
@@ -59,13 +60,14 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 		}
 		else
 		{
-			tempP = findParent(ev->getStartTime());
-			insertHelper(newNodeToInsert, tempP);
+			tempParent = findParent(newEventToInsert->getStartTime());
+			insertHelper(newNodeToInsert, tempParent);
 		}
 
-		return ev;
+		res = newEventToInsert;
 	}
-	
+
+	return res;
 }
 //recursive function to insert the the node to its right place in the CalendarTree
 void CalendarTree::insertHelper(Node* newNode, Node* newNodeParent)
@@ -75,6 +77,7 @@ void CalendarTree::insertHelper(Node* newNode, Node* newNodeParent)
 		newNodeParent->insertToTwoChildNode(newNode);
 		return;
 	}
+
 	else if (newNodeParent->checkNumOfChildren() == THREE_CHILD)
 	{
 		Node *temp;
@@ -103,6 +106,13 @@ Node* CalendarTree::divideNode(Node* p, Node *child)
 			newP->setMiddleChild(p->getLeftChild());
 			newP->setMin1(childMin);
 			newP->setMin2(p->getmin(1));
+			if (child->isLeaf())
+			{
+				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
+				newP->getLeftChild()->setPrevBrother(nullptr);
+				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
+			}
+
 		}
 		else if (childMin < p->getmin(2))
 		{
@@ -110,6 +120,14 @@ Node* CalendarTree::divideNode(Node* p, Node *child)
 			newP->setMiddleChild(child);
 			newP->setMin1(p->getmin(1));
 			newP->setMin2(childMin);
+
+			if (child->isLeaf())
+			{
+				newP->getMiddleChild()->setNextBrother(newP->getLeftChild()->getNextBrother());
+				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
+				p->getLeftChild()->setPrevBrother(newP->getMiddleChild());
+				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
+			}
 		}
 		p->setLeftChild(p->getMiddleChild());
 		p->setMiddleChild(p->getRightChild());
@@ -126,6 +144,14 @@ Node* CalendarTree::divideNode(Node* p, Node *child)
 			newP->setMin1(childMin);
 			newP->setMiddleChild(p->getRightChild());
 			newP->setMin2(p->getmin(3));
+
+			if (child->isLeaf())
+			{
+				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
+				p->getMiddleChild()->setNextBrother(newP->getLeftChild());
+				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
+				newP->getLeftChild()->setPrevBrother(p->getMiddleChild());
+			}
 		}
 		else if (childMin > p->getmin(3))
 		{
@@ -133,6 +159,13 @@ Node* CalendarTree::divideNode(Node* p, Node *child)
 			newP->setMiddleChild(child);
 			newP->setMin1(p->getmin(3));
 			newP->setMin2(child->getKey());
+
+			if (child->isLeaf())
+			{
+				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
+				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
+				newP->getMiddleChild()->setNextBrother(nullptr);
+			}
 		}
 		p->setRightChild(NULL);
 		p->setMin3(-1);
@@ -158,7 +191,7 @@ Node* CalendarTree::divideNode(Node* p, Node *child)
 //uses FIND to find a key (that it gets as input) and deletes it from the tree
 void CalendarTree::Delete(const treeKey &key)
 {
-	Node *delNode = Find(key);
+	Node *delNode = Find(key, RegularFind);
 
 	if (delNode == NULL || root == NULL)
 	{
@@ -364,7 +397,7 @@ CalendarEvent * CalendarTree::eventAfter(time_t startTime)
 
 	if (leaf != nullptr && leaf->getNext() != nullptr)
 		ev = leaf->getNext()->getEvent();
-	
+
 	return ev;
 }
 
