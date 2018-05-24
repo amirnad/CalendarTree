@@ -26,7 +26,7 @@ bool Node::isLeaf()
 	{
 		isLeaf = false;
 	}
-	
+
 	return isLeaf;
 }
 
@@ -154,14 +154,44 @@ void Node::fixMins()
 {
 	if (!isLeaf())
 	{
-		min1 = this->getLeftChild()->getmin(1);
-		min2 = this->getMiddleChild()->getmin(2);
-
-		if (this->checkNumOfChildren() == THREE_CHILD)
-			min3 = this->getRightChild()->getmin(3);
-		else
-			this->min3 = -1;
+		min1 = setNodeMin(this->getLeftChild());
+		min2 = setNodeMin(this->getMiddleChild());
+		min3 = setNodeMin(this->getRightChild());
 	}
+
+}
+
+int Node::setNodeMin(Node* nodeToSet)
+{
+	int min = -1;
+	if (nodeToSet != nullptr)
+	{
+
+		if (nodeToSet->isLeaf())
+		{
+			min = nodeToSet->getKey();
+		}
+		else
+		{
+			min = nodeToSet->getmin(1);
+		}
+	}
+	return min;
+}
+
+
+void Node::orderNodeToLeft()
+{
+	leftChild = middleChild;
+	middleChild = rightChild;
+	rightChild = nullptr;
+}
+
+void Node::orderNodeToRight()
+{
+	rightChild = middleChild;
+	middleChild = leftChild;
+	leftChild = nullptr;
 }
 
 void Node::deleteNodeFromThree(Node *delNode)

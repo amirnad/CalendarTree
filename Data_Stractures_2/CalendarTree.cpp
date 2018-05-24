@@ -417,6 +417,80 @@ CalendarEvent * CalendarTree::eventAfter(time_t startTime)
 	return requestedEvent;
 }
 
+CalendarEvent * CalendarTree::deleteFirst()
+{
+	CalendarEvent* erasedEvent = nullptr;
+
+	if (root != nullptr)
+	{
+		if (root->isLeaf())
+		{
+			erasedEvent = root->getData();
+			delete root;
+			root = nullptr;
+		}
+		else
+		{
+			erasedEvent = removeFirstEvent(root, nullptr);
+		}
+	}
+	return erasedEvent;
+
+}
+
+CalendarEvent * CalendarTree::removeFirstEvent(Node * node, Node * parent)
+{
+	CalendarEvent* erasedEvent = nullptr;
+	
+	//going down the tree until we get to the left most leaf (the event that we want to remove)
+	if (node->getLeftChild()->isLeaf())
+	{
+		erasedEvent = node->getLeftChild()->getData();
+		node->getLeftChild()->getNextBrother()->setPrevBrother(nullptr);
+		delete node->getLeftChild();
+		node->orderNodeToLeft();
+		node->fixMins();
+	}
+	else
+	{
+		erasedEvent = removeFirstEvent(node->getLeftChild(), node);
+	}
+	if (node->getMiddleChild() == nullptr) // in this case - there is an illegal situation of only one son, so we need to organize the whole tree
+	{
+		node = organizeTree(node, parent);//);
+		
+	}
+	node->fixMins();
+	return erasedEvent;
+}
+
+Node* CalendarTree::organizeTree(Node* node, Node* parent)
+{
+	if (parent == nullptr)
+	{
+		root = node->getLeftChild();
+		delete node;
+		node = root;
+	}
+	else if (parent->getMiddleChild()->getRightChild() != nullptr)
+	{
+		node->setMiddleChild(parent->getMiddleChild()->getLeftChild());
+		parent->getMiddleChild()->orderNodeToRight();
+		parent->getMiddleChild()->fixMins();
+	}
+	else
+	{
+		parent->getMiddleChild()->orderNodeToRight();
+		parent->getMiddleChild()->setLeftChild(node->getLeftChild());
+		parent->getMiddleChild()->fixMins();
+		delete node;
+		parent->orderNodeToLeft();
+		parent->fixMins();
+		node = parent->getLeftChild();
+	}
+	return node;
+}
+
 bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 {
 	bool isLegal = true;
