@@ -53,8 +53,8 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 			else
 			{
 				newRoot = new Node(root->getKey(), newEventToInsert->getStartTime(), -1, NULL, root, newNodeToInsert, NULL);
-				newNodeToInsert->setNextBrother(newNodeToInsert);
-				root->setPrevBrother(root);
+				root->setNextBrother(newNodeToInsert);
+				newNodeToInsert->setPrevBrother(root);
 			}
 
 			newNodeToInsert->setParent(newRoot);
@@ -378,13 +378,13 @@ void CalendarTree::printSorted()
 	{
 		curr = curr->getLeftChild();
 	}
-	
+
 	while (curr != nullptr)
 	{
 		curr->getData()->print();
 		curr = curr->getNextBrother();
 	}
-	
+
 }
 
 CalendarEvent* CalendarTree::eventAt(time_t newEventStartTime)
@@ -441,7 +441,7 @@ CalendarEvent * CalendarTree::deleteFirst()
 CalendarEvent * CalendarTree::removeFirstEvent(Node * node, Node * parent)
 {
 	CalendarEvent* erasedEvent = nullptr;
-	
+
 	//going down the tree until we get to the left most leaf (the event that we want to remove)
 	if (node->getLeftChild()->isLeaf())
 	{
@@ -458,7 +458,7 @@ CalendarEvent * CalendarTree::removeFirstEvent(Node * node, Node * parent)
 	if (node->getMiddleChild() == nullptr) // in this case - there is an illegal situation of only one son, so we need to organize the whole tree
 	{
 		node = organizeTree(node, parent);//);
-		
+
 	}
 	node->fixMins();
 	return erasedEvent;
@@ -498,12 +498,20 @@ bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 	treeKey newEventStartTime = eventToInsert->getStartTime();
 	treeKey newEventEndTime = newEventStartTime + eventToInsert->getDuration();
 	Node* currLeaf = Find(newEventStartTime);
-	if (currLeaf != nullptr && currLeaf->getData()->isWithinBounds(newEventStartTime, newEventEndTime))
+	treeKey currEventEndTime;
+	if (currLeaf != nullptr)
 	{
-		isLegal = false;
+		currEventEndTime = currLeaf->getData()->getStartTime() + currLeaf->getData()->getDuration(); // we need this value for the manual check
+		if (currLeaf != nullptr && currLeaf->getData()->isWithinBounds(newEventStartTime, newEventEndTime))
+		{
+			isLegal = false;
+		}
+		//manual check for a case that we try to insert an event exactly between 2 events (Alice 100 10, Bob 120 10, Joseph 110 10)
+		if (newEventStartTime == currEventEndTime && newEventEndTime <= currLeaf->getNextBrother()->getData()->getStartTime())
+		{
+			isLegal = true;
+		}
 	}
-
 	return isLegal;
 }
 
-	
