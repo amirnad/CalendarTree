@@ -25,7 +25,14 @@ class Node
 	CalendarEvent* data;
 
 public:
-	Node(const treeKey &_min1 = -1, const treeKey &_min2 = -1, const treeKey &_min3 = -1, Node *_parent = NULL, Node *_leftChild = NULL, Node *_middleChild = NULL, Node *_rightChild = NULL);
+	Node(
+		const treeKey &_min1 = -1,
+		const treeKey &_min2 = -1,
+		const treeKey &_min3 = -1,
+		Node *_parent = nullptr,
+		Node *_leftChild = nullptr,
+		Node *_middleChild = nullptr,
+		Node *_rightChild = nullptr);
 	~Node();
 
 	//leaf functions
@@ -62,6 +69,10 @@ public:
 	void insertToTwoChildNode(Node *newChild);
 	void fixParent();
 	void fixMins();
+	int setNodeMin(Node* nodeToSet);
+
+	void orderNodeToLeft();
+	void orderNodeToRight();
 
 	void deleteNodeFromThree(Node *delNode);
 	void deleteNodeFromTwo(Node *delNode);

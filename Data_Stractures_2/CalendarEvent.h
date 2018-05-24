@@ -21,6 +21,8 @@ public:
 	void print(); // "print" the event to cout
 	bool isEventStillHappening(time_t requestedTime);
 	bool isEventInRange(time_t requestedTime);
+	bool isWithinBounds(time_t newEventStart, time_t newEventEnd);
+
 };
 
 #endif

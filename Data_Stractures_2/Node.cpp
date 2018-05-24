@@ -4,19 +4,21 @@ Node::Node(const treeKey &_min1, const treeKey &_min2, const treeKey &_min3, Nod
 	leftChild(_leftChild), rightChild(_rightChild), middleChild(_middleChild), parent(_parent), min1(_min1), min2(_min2), min3(_min3) {}
 
 Node::~Node() {}
-//takes a node and makes it a leaf node
+
+//Turns node into a leaf
 void Node::makeLeaf()
 {
-	leftChild = NULL;
-	middleChild = NULL;
-	rightChild = NULL;
+	leftChild = nullptr;
+	middleChild = nullptr;
+	rightChild = nullptr;
 }
-//returns true if node is leaf , false if not
+
+//Checks if a node is a leaf
 bool Node::isLeaf()
 {
 	bool isLeaf = false;
 
-	if ((leftChild == NULL) && (middleChild == NULL) && (rightChild == NULL))
+	if ((leftChild == nullptr) && (middleChild == nullptr) && (rightChild == nullptr))
 	{
 		isLeaf = true;
 	}
@@ -24,10 +26,11 @@ bool Node::isLeaf()
 	{
 		isLeaf = false;
 	}
-	
+
 	return isLeaf;
 }
-//return the min that the user asked for
+
+//Returns the min1\min2\min3
 int Node::getmin(int num)const
 {
 	switch (num)
@@ -43,27 +46,36 @@ int Node::getmin(int num)const
 		break;
 	}
 }
-//goes into the parent field and updates it
+
+//Updates the parent of a node
 void Node::updateParnet()
 {
 	if (!isLeaf())
 	{
 		leftChild->setParent(this);
 		middleChild->setParent(this);
-		if (rightChild != NULL)
+		if (rightChild != nullptr)
 			rightChild->setParent(this);
 	}
 }
-//returns the number of the children that the nodes holds
+
+//Check the number of children of a node
 int Node::checkNumOfChildren()
 {
-	if (rightChild == NULL && middleChild == NULL && leftChild != NULL)
+	if ((rightChild == nullptr) && (middleChild == nullptr) && (leftChild != nullptr))
+	{
 		return ONE_CHILD;
-	else if (rightChild == NULL && !(this->isLeaf()))
+	}
+	else if ((rightChild == nullptr) && !(this->isLeaf()))
+	{
 		return TWO_CHILD;
+	}
 	else
+	{
 		return THREE_CHILD;
+	}
 }
+
 //puts a new node into a parents that holds only 2 children
 void Node::insertToTwoChildNode(Node *newChildToInsert)
 {
@@ -127,6 +139,7 @@ void Node::insertToTwoChildNode(Node *newChildToInsert)
 	}
 	newChildToInsert->setParent(this);
 }
+
 //if any changes were made to some children this function will update to their right parent 
 void Node::fixParent()
 {
@@ -141,15 +154,46 @@ void Node::fixMins()
 {
 	if (!isLeaf())
 	{
-		min1 = this->getLeftChild()->getmin(1);
-		min2 = this->getMiddleChild()->getmin(2);
-
-		if (this->checkNumOfChildren() == THREE_CHILD)
-			min3 = this->getRightChild()->getmin(3);
-		else
-			this->min3 = -1;
+		min1 = setNodeMin(this->getLeftChild());
+		min2 = setNodeMin(this->getMiddleChild());
+		min3 = setNodeMin(this->getRightChild());
 	}
+
 }
+
+int Node::setNodeMin(Node* nodeToSet)
+{
+	int min = -1;
+	if (nodeToSet != nullptr)
+	{
+
+		if (nodeToSet->isLeaf())
+		{
+			min = nodeToSet->getKey();
+		}
+		else
+		{
+			min = nodeToSet->getmin(1);
+		}
+	}
+	return min;
+}
+
+
+void Node::orderNodeToLeft()
+{
+	leftChild = middleChild;
+	middleChild = rightChild;
+	rightChild = nullptr;
+}
+
+void Node::orderNodeToRight()
+{
+	rightChild = middleChild;
+	middleChild = leftChild;
+	leftChild = nullptr;
+}
+
 void Node::deleteNodeFromThree(Node *delNode)
 {
 	if (delNode == leftChild)
@@ -170,7 +214,7 @@ void Node::deleteNodeFromThree(Node *delNode)
 		delete delNode;
 
 	min3 = -1;
-	rightChild = NULL;
+	rightChild = nullptr;
 }
 
 void Node::deleteNodeFromTwo(Node *delNode)
@@ -183,20 +227,28 @@ void Node::deleteNodeFromTwo(Node *delNode)
 	else
 		delete middleChild;
 
-	middleChild = NULL;
+	middleChild = nullptr;
 	min2 = -1;
 }
 
 int Node::whichAmI()
 {
 	if (this == parent->getLeftChild())
+	{
 		return LEFT;
+	}
 	else if (this == parent->getMiddleChild())
+	{
 		return MIDDLE;
+	}
 	else if (this == parent->getRightChild())
+	{
 		return RIGHT;
+	}
 	else
+	{
 		return ROOT;
+	}
 }
 
 void Node::setNextBrother(Node* _nextBrother)

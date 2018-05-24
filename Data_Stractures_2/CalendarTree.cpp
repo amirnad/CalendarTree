@@ -1,14 +1,16 @@
 #include "CalendarTree.h"
+
 //will free the tree
 CalendarTree::~CalendarTree()
 {
 	freeTree(root);
-	root = NULL;
+	root = nullptr;
 }
+
 //goes from treeNode to treeNode and deletes it
 void CalendarTree::freeTree(Node *delRoot)
 {
-	if (delRoot == NULL)
+	if (delRoot == nullptr)
 		return;
 	else if (delRoot->isLeaf())
 		delete delRoot;
@@ -19,6 +21,7 @@ void CalendarTree::freeTree(Node *delRoot)
 		freeTree(delRoot->getRightChild());
 	}
 }
+
 //gets a key or data from the input and adds it to the right place in the 2-3 tree
 CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 {
@@ -37,7 +40,6 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 		}
 
 		//There is already one leaf
-
 		else if (root->isLeaf())
 		{
 			Node* newRoot;
@@ -70,7 +72,8 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
 
 	return res;
 }
-//recursive function to insert the the node to its right place in the CalendarTree
+
+//Recursive function to insert the the node to its right place in the CalendarTree
 void CalendarTree::insertHelper(Node* newNode, Node* newNodeParent)
 {
 	if (newNodeParent->checkNumOfChildren() == TWO_CHILD)
@@ -82,12 +85,14 @@ void CalendarTree::insertHelper(Node* newNode, Node* newNodeParent)
 	else if (newNodeParent->checkNumOfChildren() == THREE_CHILD)
 	{
 		Node *temp;
+
 		temp = divideNode(newNodeParent, newNode);
-		if (temp != NULL)
+		if (temp != nullptr)
 			insertHelper(temp, newNodeParent->getParnet());
 	}
 }
-//if a node as more then 3 children the function will make a new node and divide the children between the two
+
+//When adding a child to a 3 child node, split the node
 Node* CalendarTree::divideNode(Node* p, Node *child)
 {
 	Node *newP = new Node;
@@ -132,7 +137,7 @@ Node* CalendarTree::divideNode(Node* p, Node *child)
 		}
 		p->setLeftChild(p->getMiddleChild());
 		p->setMiddleChild(p->getRightChild());
-		p->setRightChild(NULL);
+		p->setRightChild(nullptr);
 		p->setMin1(p->getmin(2));
 		p->setMin2(p->getmin(3));
 		p->setMin3(-1);
@@ -168,45 +173,50 @@ Node* CalendarTree::divideNode(Node* p, Node *child)
 				newP->getMiddleChild()->setNextBrother(nullptr);
 			}
 		}
-		p->setRightChild(NULL);
+		p->setRightChild(nullptr);
 		p->setMin3(-1);
 	}
 	p->fixParent();
 	newP->fixParent();
 
-	if (p->getParnet() == NULL)
+	if (p->getParnet() == nullptr)
 	{
 		Node *newRoot;
 		if (p->getmin(1) > newP->getmin(1))
-			newRoot = new Node(newP->getmin(1), p->getmin(1), -1, NULL, newP, p, NULL);
+			newRoot = new Node(newP->getmin(1), p->getmin(1), -1, nullptr, newP, p, nullptr);
 		else
-			newRoot = new Node(p->getmin(1), newP->getmin(1), -1, NULL, p, newP, NULL);
+			newRoot = new Node(p->getmin(1), newP->getmin(1), -1, nullptr, p, newP, nullptr);
 
 		this->setRoot(newRoot);
 		p->setParent(newRoot);
 		newP->setParent(newRoot);
-		return NULL;
+
+		return nullptr;
 	}
 	return newP;
 }
-//uses FIND to find a key (that it gets as input) and deletes it from the tree
+
+//Uses FIND to find a key (that it gets as input) and deletes it from the tree
 void CalendarTree::Delete(const treeKey &key)
 {
-	Node *delNode = Find(key, RegularFind);
+	Node *delNode = Find(key);
 
-	if (delNode == NULL || root == NULL)
+	if (delNode == nullptr || root == nullptr)
 	{
 		cout << "key does not exist" << endl;
 	}
 	else if (root->isLeaf() && delNode == root)
 	{
 		delete root;
-		root = NULL;
+		root = nullptr;
 	}
 	else
+	{
 		deleteHelper(delNode->getParnet(), delNode);
+	}
 }
-//recursive function to delete a node
+
+//Recursive function to delete a node
 void CalendarTree::deleteHelper(Node* currParent, Node* currChild)
 {
 	int whichChild, num;
@@ -245,6 +255,7 @@ void CalendarTree::deleteHelper(Node* currParent, Node* currChild)
 				deleteHelper(currParent->getParnet(), currParent);
 			}
 			break;
+
 		case MIDDLE:
 			temp = currParent->getParnet()->getLeftChild();
 			if (temp->checkNumOfChildren() == THREE_CHILD)
@@ -265,6 +276,7 @@ void CalendarTree::deleteHelper(Node* currParent, Node* currChild)
 				deleteHelper(currParent->getParnet(), currParent);
 			}
 			break;
+
 		case RIGHT:
 			temp = currParent->getParnet()->getMiddleChild();
 			if (temp->checkNumOfChildren() == THREE_CHILD)
@@ -285,6 +297,7 @@ void CalendarTree::deleteHelper(Node* currParent, Node* currChild)
 				deleteHelper(currParent->getParnet(), currParent);
 			}
 			break;
+
 		case ROOT:
 			temp = currParent->getLeftChild();
 			delete root;
@@ -295,38 +308,20 @@ void CalendarTree::deleteHelper(Node* currParent, Node* currChild)
 		}
 	}
 }
-//gets a key from the input and finds the node that holds it
-Node* CalendarTree::Find(const treeKey &key, eTypeOfFind whichFind)const
+
+//Gets a key from the input and finds the node that holds it
+Node* CalendarTree::Find(const treeKey &key)const
 {
 	Node* curr;
 
 	curr = root;
-	if (curr == NULL)
-		return NULL;
+	if (curr == nullptr)
+		return nullptr;
 
-	while (curr != NULL)
+	while (curr != nullptr)
 	{
 		if (curr->isLeaf())
-		{
-			switch (whichFind)
-			{
-			case RegularFind:
-				if (curr->getKey() == key)//
-					return curr;
-				break;
-			case EventAt:
-				if (curr->getData()->isEventStillHappening(key))
-					return curr;
-				break;
-			case EventAfter:
-				if (curr->getKey() == key)
-					return curr;
-				else if (curr->getData()->isEventInRange(key) && curr->getNextBrother() != nullptr)
-					return curr->getNextBrother();
-				break;
-
-			}
-		}
+			return curr;
 		else
 		{
 			if (curr->checkNumOfChildren() == THREE_CHILD && key >= curr->getmin(THREE_CHILD))
@@ -339,9 +334,11 @@ Node* CalendarTree::Find(const treeKey &key, eTypeOfFind whichFind)const
 				curr = curr->getLeftChild();
 		}
 	}
-	return NULL;
+
+	return nullptr;
 }
-// finds and returns the perent of a Node bi the ID
+
+//Finds and returns the parent of a node
 Node* CalendarTree::findParent(const treeKey &ID)const
 {
 	Node * temp;
@@ -372,40 +369,30 @@ void CalendarTree::fixKeys(Node *node)
 	}
 }
 
-//goes over the tree and places the leafs in the list
-void CalendarTree::PlaceLeafsInList(Node* node)
-{
-
-	if (node->isLeaf())
-		leafList.push_back(*node);
-
-	else
-	{
-		this->PlaceLeafsInList(node->getLeftChild());
-		this->PlaceLeafsInList(node->getMiddleChild());
-
-
-		if (node->checkNumOfChildren() == THREE_CHILD)
-			this->PlaceLeafsInList(node->getRightChild());
-	}
-
-}
-//print the data in the leaf list
+//Print the data sorted
 void CalendarTree::printSorted()
 {
-	for (auto v : leafList)
+	Node* curr = root;
+
+	while (curr->getLeftChild() != nullptr)
 	{
-		v.getData()->print();
-		cout << endl;
+		curr = curr->getLeftChild();
 	}
+	
+	while (curr != nullptr)
+	{
+		curr->getData()->print();
+		curr = curr->getNextBrother();
+	}
+	
 }
 
-CalendarEvent* CalendarTree::eventAt(time_t startTime)
+CalendarEvent* CalendarTree::eventAt(time_t newEventStartTime)
 {
-	Node* requestedLeaf = Find(startTime, EventAfter);
+	Node* requestedLeaf = Find(newEventStartTime);
 	CalendarEvent* requestedEvent = nullptr;
 
-	if (requestedLeaf != NULL)
+	if ((requestedLeaf != nullptr) && (requestedLeaf->getData()->isEventStillHappening(newEventStartTime)))
 	{
 		requestedEvent = requestedLeaf->getData();
 	}
@@ -415,27 +402,108 @@ CalendarEvent* CalendarTree::eventAt(time_t startTime)
 
 CalendarEvent * CalendarTree::eventAfter(time_t startTime)
 {
-	Node* requestedLeaf = Find(startTime, EventAfter);
+	Node* requestedLeaf = Find(startTime);
 	CalendarEvent* requestedEvent = nullptr;
 
-	if (requestedLeaf != NULL)
+	if ((requestedLeaf != nullptr) && (requestedLeaf->getKey() >= startTime))
 	{
 		requestedEvent = requestedLeaf->getData();
 	}
-
+	else if ((requestedLeaf != nullptr) && (requestedLeaf->getNextBrother() != nullptr))
+	{
+		requestedEvent = requestedLeaf->getNextBrother()->getData();
+	}
 
 	return requestedEvent;
 }
 
+CalendarEvent * CalendarTree::deleteFirst()
+{
+	CalendarEvent* erasedEvent = nullptr;
+
+	if (root != nullptr)
+	{
+		if (root->isLeaf())
+		{
+			erasedEvent = root->getData();
+			delete root;
+			root = nullptr;
+		}
+		else
+		{
+			erasedEvent = removeFirstEvent(root, nullptr);
+		}
+	}
+	return erasedEvent;
+
+}
+
+CalendarEvent * CalendarTree::removeFirstEvent(Node * node, Node * parent)
+{
+	CalendarEvent* erasedEvent = nullptr;
+	
+	//going down the tree until we get to the left most leaf (the event that we want to remove)
+	if (node->getLeftChild()->isLeaf())
+	{
+		erasedEvent = node->getLeftChild()->getData();
+		node->getLeftChild()->getNextBrother()->setPrevBrother(nullptr);
+		delete node->getLeftChild();
+		node->orderNodeToLeft();
+		node->fixMins();
+	}
+	else
+	{
+		erasedEvent = removeFirstEvent(node->getLeftChild(), node);
+	}
+	if (node->getMiddleChild() == nullptr) // in this case - there is an illegal situation of only one son, so we need to organize the whole tree
+	{
+		node = organizeTree(node, parent);//);
+		
+	}
+	node->fixMins();
+	return erasedEvent;
+}
+
+Node* CalendarTree::organizeTree(Node* node, Node* parent)
+{
+	if (parent == nullptr)
+	{
+		root = node->getLeftChild();
+		delete node;
+		node = root;
+	}
+	else if (parent->getMiddleChild()->getRightChild() != nullptr)
+	{
+		node->setMiddleChild(parent->getMiddleChild()->getLeftChild());
+		parent->getMiddleChild()->orderNodeToRight();
+		parent->getMiddleChild()->fixMins();
+	}
+	else
+	{
+		parent->getMiddleChild()->orderNodeToRight();
+		parent->getMiddleChild()->setLeftChild(node->getLeftChild());
+		parent->getMiddleChild()->fixMins();
+		delete node;
+		parent->orderNodeToLeft();
+		parent->fixMins();
+		node = parent->getLeftChild();
+	}
+	return node;
+}
 
 bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 {
-	bool isLegal = false;
-	treeKey keyToInsert = eventToInsert->getStartTime();
+	bool isLegal = true;
 
-	if (Find(keyToInsert, EventAt) == nullptr)
+	treeKey newEventStartTime = eventToInsert->getStartTime();
+	treeKey newEventEndTime = newEventStartTime + eventToInsert->getDuration();
+	Node* currLeaf = Find(newEventStartTime);
+	if (currLeaf != nullptr && currLeaf->getData()->isWithinBounds(newEventStartTime, newEventEndTime))
 	{
-		isLegal = true;
+		isLegal = false;
 	}
+
 	return isLegal;
 }
+
+	

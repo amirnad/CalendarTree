@@ -1,0 +1,36 @@
+"Insert and find, some failed inserts, includes contiguous events"
+input =
+I 100 10 Alice
+I 95 9 BobF
+I 95 1 Cookie
+I 100 10 DannyF
+I 90 1 Evelyn
+I 10 80 Fred
+F 60
+A 70
+F 100
+A 100
+I 10 10 GinnaF
+I 5 9 HelenF
+I 5 1 Ivy
+P
+Q
+output =
+Inserted: 100 10 Alice
+Cannot insert: (95, 9)
+Inserted: 95 1 Cookie
+Cannot insert: (100, 10)
+Inserted: 90 1 Evelyn
+Inserted: 10 80 Fred
+Found: 10 80 Fred
+Found: 90 1 Evelyn
+Found: 100 10 Alice
+Found: 100 10 Alice
+Cannot insert: (10, 10)
+Cannot insert: (5, 9)
+Inserted: 5 1 Ivy
+5 1 Ivy
+10 80 Fred
+90 1 Evelyn
+95 1 Cookie
+100 10 Alice
