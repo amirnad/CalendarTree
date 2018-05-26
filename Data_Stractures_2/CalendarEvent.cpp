@@ -34,10 +34,22 @@ bool CalendarEvent::isWithinBounds(time_t newEventStart, time_t newEventEnd)
 {
 	bool res = false;
 	time_t fullTime = startTime + duration;
-
-	if (newEventStart <= fullTime && startTime < newEventEnd)
+	
+	if (newEventStart == startTime)
+		return true;
+	if (newEventStart < startTime)
 	{
-		res = true;
+		if (newEventEnd < startTime)
+			res = false;
+		else
+			res = true;
+	}
+	else if (newEventStart > startTime)
+	{
+		if (newEventStart <= fullTime)
+			res = true;
+		else
+			res = false;
 	}
 	return res;
 }

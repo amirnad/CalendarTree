@@ -19,7 +19,7 @@ typedef time_t treeKey;
 
 class Node
 {
-	Node *leftChild, *middleChild, *rightChild, *parent, *prevBrother, *nextBrother;
+	Node *leftChild = nullptr , *middleChild = nullptr, *rightChild = nullptr, *parent = nullptr, *prevBrother = nullptr, *nextBrother = nullptr;
 	treeKey min1, min2, min3;
 	treeKey key;
 	CalendarEvent* data;
@@ -33,6 +33,7 @@ public:
 		Node *_leftChild = nullptr,
 		Node *_middleChild = nullptr,
 		Node *_rightChild = nullptr);
+	Node(Node *left, Node *middle);
 	~Node();
 
 	//leaf functions
@@ -67,6 +68,7 @@ public:
 	int whichAmI();
 	void updateParnet();
 	void insertToTwoChildNode(Node *newChild);
+	Node* divideNode(Node *nodeToInsert);
 	void fixParent();
 	void fixMins();
 	int setNodeMin(Node* nodeToSet);
