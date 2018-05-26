@@ -8,34 +8,26 @@
 using namespace std;
 class CalendarTree
 {
-	Node *root;
+	Node* m_Root;
 
 public:
-	CalendarTree(Node *root = nullptr) :root(root) {}
+	CalendarTree(Node* i_Root = nullptr) : m_Root(i_Root) {}
 	~CalendarTree();
-	void freeTree(Node *delRoot);
+	void freeTree(Node* i_RootToDelete);
 
-	void setRoot(Node* newRoot) { root = newRoot; }
-	Node* getRoot() { return root; }
-
-	CalendarEvent* insert(CalendarEvent* eventToInsert);
-	bool isInsertLegal(CalendarEvent* eventToInsert);
-	void insertHelper(Node *currentRoot, Node *nodeToInsert, Node *parent, Node **sibling);
-	Node* getNextLevel(Node *curRoot, const treeKey &ID)const;
-
-	void Delete(const treeKey &ID);
-	void deleteHelper(Node* p, Node* p_child);
-	Node* Find(const treeKey &_ID)const;
-	void fixKeys(Node *node);
-
-	void printSorted();
-
-	CalendarEvent* eventAt(time_t newEventStartTime);
-	CalendarEvent* eventAfter(time_t newEventStartTime);
-	
+	CalendarEvent* insert(CalendarEvent* i_EventToInsert);
+	void insertHelper(Node** i_Sibling, Node* i_CurRoot, Node* i_EventToInsert, Node* i_Parent);
+	bool isInsertLegal(CalendarEvent* i_EventToInsert);
 	CalendarEvent* deleteFirst();
-	CalendarEvent* removeFirstEvent(Node* node, Node* parent);
-	Node* organizeTree(Node* node, Node* parent);
+	void deleteHelper(Node* i_CurrParent, Node* i_CurrChild);
+	CalendarEvent* removeFirstEvent(Node* i_EventNode, Node* i_Parent);
+	Node* getNextLevel(Node* i_CurRoot, treeKey i_Key);
+	Node* findEvent(treeKey i_TimeToFind);
+	CalendarEvent* eventAt(time_t i_TimeToFind);
+	CalendarEvent* eventAfter(time_t i_TimeToFind);
+	void fixKeys(Node* i_EventNode);
+	Node* organizeTree(Node* i_EventNode, Node* i_Parent);
+	void printSorted();
 };
 
 #endif
