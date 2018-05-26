@@ -32,12 +32,15 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* eventToInsert)
 		nodeToInsert = new Node();
 		nodeToInsert->setLeaf(eventToInsert);
 
+		//The tree is empty
 		if (root == nullptr)
 		{
 			root = nodeToInsert;
 		}
+		//There is already one leaf
 		else if (root->isLeaf())
 		{
+			//check in which order to insert the nodes
 			if (root->getKey() < nodeToInsert->getKey())
 			{
 				newRoot = new Node(root, nodeToInsert);
@@ -50,12 +53,13 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* eventToInsert)
 				nodeToInsert->setNextBrother(root);
 				root->setPrevBrother(nodeToInsert);
 			}
+			//make sure the node values are set properly
 			newRoot->fixMins();
 			root = newRoot;
 		}
 		else
 		{
-
+			//in this case - the root isn't a leaf so we go the recusive function in order to insert currectly
 			insertHelper(root, nodeToInsert, nullptr, &sibling);
 		}
 
@@ -64,6 +68,12 @@ CalendarEvent* CalendarTree::insert(CalendarEvent* eventToInsert)
 	return returnedEvent;
 }
 
+//Recursive function to insert the the node to its right place in the CalendarTree
+/*THE IDEA: Traverse the tree until we get the place in which we need to insert the new node.
+			We traverse the tree one level at a time until we get to the requested level.
+			At the requested level - if it has 2 children, we can insert our node safely and finish.
+			Otherwise - we use a division method in order to split the place in which we want to insert to 2 parts.
+			In case we did that, we need to connect the new node to the tree in the if statement starting in line 96.*/
 void CalendarTree::insertHelper(Node *currentRoot, Node *nodeToInsert, Node *parent, Node **sibling)
 {
 	Node *temp = nullptr;
@@ -74,24 +84,24 @@ void CalendarTree::insertHelper(Node *currentRoot, Node *nodeToInsert, Node *par
 	{
 		if (currentRoot->checkNumOfChildren() == TWO_CHILD)
 			currentRoot->insertToTwoChildNode(nodeToInsert);
-		else
+		else//no sapce - divide the node into 2 parts in order to insert the new node
 			(*sibling) = currentRoot->divideNode(nodeToInsert);
 	}
 	else
 	{
 		tempParent = getNextLevel(currentRoot, nodeToInsert->getKey());
-		insertHelper(tempParent, nodeToInsert, currentRoot , sibling);
+		insertHelper(tempParent, nodeToInsert, currentRoot, sibling);
 	}
 
-	if (*sibling != nullptr)
+	if (*sibling != nullptr) //in case we created a new node at divideNode method --> we must connect it to the tree
 	{
 		if (parent == nullptr)
-		{
+		{//connecting the 2 new nodes to a new parent
 			newRoot = new Node((*sibling), currentRoot);
 			root = newRoot;
 		}
 		else
-		{
+		{//adding the 1 new node to an existing parent
 			parent->fixMins();
 			if (parent->checkNumOfChildren() == TWO_CHILD)
 			{
@@ -101,196 +111,28 @@ void CalendarTree::insertHelper(Node *currentRoot, Node *nodeToInsert, Node *par
 			else
 			{
 				*sibling = parent->divideNode(*sibling);
-				
 			}
 
 		}
 	}
-	currentRoot->fixMins();
+	currentRoot->fixMins(); //make sure min values are set properly before leaving the method
+}
+
+//Going down one level in the tree - by a given Key
+Node* CalendarTree::getNextLevel(Node *curRoot, const treeKey &ID)const
+{
+	Node *nextLevel = nullptr;
+	if (curRoot->checkNumOfChildren() == THREE_CHILD && ID >= curRoot->getmin(3))
+		nextLevel = curRoot->getRightChild();
+	else if (ID >= curRoot->getmin(2))
+		nextLevel = curRoot->getMiddleChild();
+	else
+		nextLevel = curRoot->getLeftChild();
+
+	return nextLevel;
 }
 
 
-
-
-////gets a key or data from the input and adds it to the right place in the 2-3 tree
-//CalendarEvent* CalendarTree::insert(CalendarEvent* newEventToInsert)
-//{
-//	Node* newNodeToInsert, *tempParent;
-//	CalendarEvent* res = nullptr;
-//
-//	if (isInsertLegal(newEventToInsert))
-//	{
-//		newNodeToInsert = new Node;
-//		newNodeToInsert->setLeaf(newEventToInsert);
-//
-//		//The tree is empty
-//		if (root == NULL)
-//		{
-//			root = newNodeToInsert;
-//		}
-//
-//		//There is already one leaf
-//		else if (root->isLeaf())
-//		{
-//			Node* newRoot;
-//			if (root->getKey() > newEventToInsert->getStartTime())
-//			{
-//				newRoot = new Node(newEventToInsert->getStartTime(), root->getKey(), -1, NULL, newNodeToInsert, root, NULL);
-//				newNodeToInsert->setNextBrother(root);
-//				root->setPrevBrother(newNodeToInsert);
-//			}
-//
-//			else
-//			{
-//				newRoot = new Node(root->getKey(), newEventToInsert->getStartTime(), -1, NULL, root, newNodeToInsert, NULL);
-//				root->setNextBrother(newNodeToInsert);
-//				newNodeToInsert->setPrevBrother(root);
-//			}
-//
-//			newNodeToInsert->setParent(newRoot);
-//			root->setParent(newRoot);
-//			root = newRoot;
-//		}
-//		else
-//		{
-//			tempParent = findParent(newNodeToInsert->getKey());
-//			insertHelper(newNodeToInsert, tempParent);
-//		}
-//
-//		res = newEventToInsert;
-//	}
-//
-//	return res;
-//}
-
-////Recursive function to insert the the node to its right place in the CalendarTree
-//void CalendarTree::insertHelper(Node* newNode, Node* newNodeParent)
-//{
-//	Node* tempParent;
-//
-//	if (newNodeParent->checkNumOfChildren() == TWO_CHILD)
-//	{
-//		newNodeParent->insertToTwoChildNode(newNode);
-//		return;
-//	}
-//
-//	else if (newNodeParent->checkNumOfChildren() == THREE_CHILD)
-//	{
-//		Node *temp;
-//
-//		temp = divideNode(newNodeParent, newNode);
-//		if (temp != nullptr)
-//		{
-//			insertHelper(temp, this->getRoot());//->getParnet());
-//		}
-//	}
-//}
-
-////When adding a child to a 3 child node, split the node
-//Node* CalendarTree::divideNode(Node* p, Node *child)
-//{
-//	Node *newP = new Node;
-//	treeKey childMin;
-//
-//	if (child->isLeaf())
-//		childMin = child->getKey();
-//	else
-//		childMin = child->getmin(1);
-//
-//
-//	if (childMin < p->getmin(1) || childMin < p->getmin(2))
-//	{
-//		if (childMin < p->getmin(1))
-//		{
-//			newP->setLeftChild(child);
-//			newP->setMiddleChild(p->getLeftChild());
-//			newP->setMin1(childMin);
-//			newP->setMin2(p->getmin(1));
-//			if (child->isLeaf())
-//			{
-//				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
-//				newP->getLeftChild()->setPrevBrother(nullptr);
-//				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
-//			}
-//
-//		}
-//		else if (childMin < p->getmin(2))
-//		{
-//			newP->setLeftChild(p->getLeftChild());
-//			newP->setMiddleChild(child);
-//			newP->setMin1(p->getmin(1));
-//			newP->setMin2(childMin);
-//
-//			if (child->isLeaf())
-//			{
-//				newP->getMiddleChild()->setNextBrother(newP->getLeftChild()->getNextBrother());
-//				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
-//				p->getLeftChild()->setPrevBrother(newP->getMiddleChild());
-//				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
-//			}
-//		}
-//		p->setLeftChild(p->getMiddleChild());
-//		p->setMiddleChild(p->getRightChild());
-//		p->setRightChild(nullptr);
-//		p->setMin1(p->getmin(2));
-//		p->setMin2(p->getmin(3));
-//		p->setMin3(-1);
-//	}
-//	else
-//	{
-//		if (childMin < p->getmin(3))
-//		{
-//			newP->setLeftChild(child);
-//			newP->setMin1(childMin);
-//			newP->setMiddleChild(p->getRightChild());
-//			newP->setMin2(p->getmin(3));
-//
-//			if (child->isLeaf())
-//			{
-//				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
-//				p->getMiddleChild()->setNextBrother(newP->getLeftChild());
-//				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
-//				newP->getLeftChild()->setPrevBrother(p->getMiddleChild());
-//			}
-//		}
-//		else if (childMin > p->getmin(3))
-//		{
-//			newP->setLeftChild(p->getRightChild());
-//			newP->setMiddleChild(child);
-//			newP->setMin1(p->getmin(3));
-//			newP->setMin2(childMin);
-//
-//			if (child->isLeaf())
-//			{
-//				newP->getLeftChild()->setNextBrother(newP->getMiddleChild());
-//				newP->getMiddleChild()->setPrevBrother(newP->getLeftChild());
-//				newP->getMiddleChild()->setNextBrother(nullptr);
-//			}
-//		}
-//		p->setRightChild(nullptr);
-//		p->setMin3(-1);
-//	}
-//	p->fixParent();
-//	newP->fixParent();
-//	//	newP->fixMins();
-//	if (p->getParnet() == nullptr)
-//	{
-//		Node *newRoot = nullptr;
-//		Node *mid = root->getMiddleChild();
-//
-//		if (p->getmin(1) > newP->getmin(1))
-//			newRoot = new Node(newP->getmin(1), p->getmin(1), -1, nullptr, newP, p, nullptr);
-//		else
-//			newRoot = new Node(p->getmin(1), newP->getmin(1), -1, nullptr, p, newP, nullptr);
-//
-//		this->setRoot(newRoot);
-//		p->setParent(newRoot);
-//		newP->setParent(newRoot);
-//
-//		return nullptr;
-//	}
-//	return newP;
-//}
 
 //Uses FIND to find a key (that it gets as input) and deletes it from the tree
 void CalendarTree::Delete(const treeKey &key)
@@ -405,6 +247,17 @@ void CalendarTree::deleteHelper(Node* currParent, Node* currChild)
 	}
 }
 
+void CalendarTree::fixKeys(Node *node)
+{
+	if (node == NULL)
+		return;
+	else
+	{
+		node->fixMins();
+		fixKeys(node->getParnet());
+	}
+}
+
 //Gets a key from the input and finds the node that holds it
 Node* CalendarTree::Find(const treeKey &key)const
 {
@@ -434,51 +287,7 @@ Node* CalendarTree::Find(const treeKey &key)const
 	return nullptr;
 }
 
-//Finds and returns the parent of a node
-Node* CalendarTree::findParent(const treeKey &ID)const
-{
-	Node * temp;
-	temp = root;
-
-	while (temp->getLeftChild() != NULL)
-	{
-		if (temp->checkNumOfChildren() == THREE_CHILD && ID > temp->getmin(3))
-			temp = temp->getRightChild();
-
-		else if (ID > temp->getmin(2))
-			temp = temp->getMiddleChild();
-
-		else
-			temp = temp->getLeftChild();
-	}
-	return temp->getParnet();
-}
-
-Node* CalendarTree::getNextLevel(Node *curRoot, const treeKey &ID)const
-{
-	Node *nextLevel = nullptr;
-	if (curRoot->checkNumOfChildren() == THREE_CHILD && ID >= curRoot->getmin(3))
-		nextLevel = curRoot->getRightChild();
-	else if (ID >= curRoot->getmin(2))
-		nextLevel = curRoot->getMiddleChild();
-	else 
-		nextLevel = curRoot->getLeftChild();
-
-	return nextLevel;
-}
-
-void CalendarTree::fixKeys(Node *node)
-{
-	if (node == NULL)
-		return;
-	else
-	{
-		node->fixMins();
-		fixKeys(node->getParnet());
-	}
-}
-
-//Print the data sorted
+//Print the data sorted --> Traverse the tree until we get the leftmost leaf, and then start printing the nodes by order (they are connected with pointers to each other)
 void CalendarTree::printSorted()
 {
 	Node* curr = root;
@@ -496,6 +305,7 @@ void CalendarTree::printSorted()
 
 }
 
+//eventAt -  returns an event that happens in a given time - even if it happens during the time and not at the exact time.
 CalendarEvent* CalendarTree::eventAt(time_t newEventStartTime)
 {
 	Node* requestedLeaf = Find(newEventStartTime);
@@ -509,12 +319,13 @@ CalendarEvent* CalendarTree::eventAt(time_t newEventStartTime)
 	return requestedEvent;
 }
 
-CalendarEvent * CalendarTree::eventAfter(time_t startTime)
+//eventAfter - returns an event that happens after the given time . In case the given time is an exact time of an event it returns the event itself.
+CalendarEvent * CalendarTree::eventAfter(time_t newEventStartTime)
 {
-	Node* requestedLeaf = Find(startTime);
+	Node* requestedLeaf = Find(newEventStartTime);
 	CalendarEvent* requestedEvent = nullptr;
 
-	if ((requestedLeaf != nullptr) && (requestedLeaf->getKey() >= startTime))
+	if ((requestedLeaf != nullptr) && (requestedLeaf->getKey() >= newEventStartTime))
 	{
 		requestedEvent = requestedLeaf->getData();
 	}
@@ -526,12 +337,14 @@ CalendarEvent * CalendarTree::eventAfter(time_t startTime)
 	return requestedEvent;
 }
 
+//Deletes the first instance of an event from the tree, and returns the event itself.
 CalendarEvent * CalendarTree::deleteFirst()
 {
 	CalendarEvent* erasedEvent = nullptr;
 
 	if (root != nullptr)
 	{
+		//in case only root --> delete it
 		if (root->isLeaf())
 		{
 			erasedEvent = root->getData();
@@ -539,7 +352,7 @@ CalendarEvent * CalendarTree::deleteFirst()
 			root = nullptr;
 		}
 		else
-		{
+		{//traverse the tree in order to find and remove the requested event
 			erasedEvent = removeFirstEvent(root, nullptr);
 		}
 	}
@@ -547,12 +360,12 @@ CalendarEvent * CalendarTree::deleteFirst()
 
 }
 
+//A recursive method to traverse the tree , find the first event , delete it and update the values of the tree accordingly
 CalendarEvent * CalendarTree::removeFirstEvent(Node * node, Node * parent)
 {
 	CalendarEvent* erasedEvent = nullptr;
 
-	//going down the tree until we get to the left most leaf (the event that we want to remove)
-	if (node->getLeftChild()->isLeaf())
+	if (node->getLeftChild()->isLeaf()) //we got to the left most leaf - erase it and fix the values above it
 	{
 		erasedEvent = node->getLeftChild()->getData();
 		node->getLeftChild()->getNextBrother()->setPrevBrother(nullptr);
@@ -561,48 +374,34 @@ CalendarEvent * CalendarTree::removeFirstEvent(Node * node, Node * parent)
 		node->fixMins();
 	}
 	else
-	{
+	{	//going down the tree until we get to the left most leaf (the event that we want to remove)
 		erasedEvent = removeFirstEvent(node->getLeftChild(), node);
 	}
 	if (node->getMiddleChild() == nullptr) // in this case - there is an illegal situation of only one son, so we need to organize the whole tree
 	{
-		node = organizeTree(node, parent);//);
-		//if (parent == nullptr)
-		//{
-		//	root = node->getLeftChild();
-		//	delete node;
-		//	node = root;
-		//}
-		//else if (parent->getMiddleChild()->getRightChild() != nullptr)
-		//{
-		//	node->setMiddleChild(parent->getMiddleChild()->getLeftChild());
-		//	parent->getMiddleChild()->orderNodeToRight();
-		//	parent->getMiddleChild()->fixMins();
-		//}
-		//else
-		//{
-		//}
+		node = organizeTree(node, parent);
 	}
 	node->fixMins();
 	return erasedEvent;
 }
 
+//Reordering the tree in case we need to
 Node* CalendarTree::organizeTree(Node* node, Node* parent)
 {
 	if (parent == nullptr)
-	{
+	{ //only root  -> update its left child (last remaining event actualy)
 		root = node->getLeftChild();
 		delete node;
 		node = root;
 	}
 	else if (parent->getMiddleChild()->getRightChild() != nullptr)
-	{
+	{ //if we have children under the middle child --> we lift them up one level
 		node->setMiddleChild(parent->getMiddleChild()->getLeftChild());
 		parent->getMiddleChild()->orderNodeToLeft();
 		parent->getMiddleChild()->fixMins();
 	}
 	else
-	{
+	{ //ordering the whole node
 		parent->getMiddleChild()->orderNodeToRight();
 		parent->getMiddleChild()->setLeftChild(node->getLeftChild());
 		parent->getMiddleChild()->fixMins();
@@ -614,6 +413,7 @@ Node* CalendarTree::organizeTree(Node* node, Node* parent)
 	return node;
 }
 
+//Checking all possible situations of event insertions in order to determine weather the insertion is legal or not.
 bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 {
 	bool isLegal = false;
@@ -628,9 +428,9 @@ bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 	}
 	else
 	{
-		time_t existEventStartTime = existEvent->getData()->getStartTime();
-		time_t existEventEndTime = existEvent->getData()->getDuration() + existEventStartTime;
-	
+		treeKey existEventStartTime = existEvent->getData()->getStartTime();
+		treeKey existEventEndTime = existEvent->getData()->getDuration() + existEventStartTime;
+
 		if (newEventStartTime <= existEventStartTime)
 		{
 			if (newEventEndTime <= existEventStartTime)
@@ -642,8 +442,8 @@ bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 				}
 				else
 				{
-					time_t prevExistEventStartTime = prevExistEvent->getData()->getStartTime();
-					time_t prevExistEventEndTime = prevExistEvent->getData()->getDuration() + prevExistEventStartTime;
+					treeKey prevExistEventStartTime = prevExistEvent->getData()->getStartTime();
+					treeKey prevExistEventEndTime = prevExistEvent->getData()->getDuration() + prevExistEventStartTime;
 
 					if (prevExistEventEndTime <= newEventStartTime)
 						isLegal = true;
@@ -661,10 +461,10 @@ bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 				{
 					isLegal = true;
 				}
-				else 
+				else
 				{
-					time_t nextExistEventStartTime = nextExistEvent->getData()->getStartTime();
-					time_t nextExistEventEndTime = nextExistEvent->getData()->getDuration() + nextExistEventStartTime;
+					treeKey nextExistEventStartTime = nextExistEvent->getData()->getStartTime();
+					treeKey nextExistEventEndTime = nextExistEvent->getData()->getDuration() + nextExistEventStartTime;
 
 					if (nextExistEventStartTime >= newEventEndTime)
 						isLegal = true;

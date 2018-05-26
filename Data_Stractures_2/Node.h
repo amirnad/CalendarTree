@@ -38,7 +38,6 @@ public:
 
 	//leaf functions
 	bool isLeaf();
-	void makeLeaf();
 	void setLeaf(CalendarEvent* ev) { this->data = ev; this->key = ev->getStartTime(); }
 
 	//get functions
@@ -49,7 +48,6 @@ public:
 	Node *getMiddleChild()const { return middleChild; }
 	Node *getRightChild()const { return rightChild; }
 	Node *getParnet()const { return parent; }
-
 
 	//set functions
 	void setLeftChild(Node* new_left) { leftChild = new_left; }

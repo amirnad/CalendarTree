@@ -6,6 +6,7 @@ void CalendarEvent::print()
 	cout << startTime << " " << duration << description << endl;
 }
 
+//Getting a time and checking if the even is happening on this time
 bool CalendarEvent::isEventStillHappening(time_t requestedTime)
 {
 	bool isHappening = false;
@@ -19,37 +20,4 @@ bool CalendarEvent::isEventStillHappening(time_t requestedTime)
 	return isHappening;
 }
 
-bool CalendarEvent::isEventInRange(time_t requestedTime)
-{
-	bool res = false;
-	time_t range = startTime + duration;
-	if (range > requestedTime)
-	{
-		res = true;
-	}
-	return res;
-}
 
-bool CalendarEvent::isWithinBounds(time_t newEventStart, time_t newEventEnd)
-{
-	bool res = false;
-	time_t fullTime = startTime + duration;
-	
-	if (newEventStart == startTime)
-		return true;
-	if (newEventStart < startTime)
-	{
-		if (newEventEnd < startTime)
-			res = false;
-		else
-			res = true;
-	}
-	else if (newEventStart > startTime)
-	{
-		if (newEventStart <= fullTime)
-			res = true;
-		else
-			res = false;
-	}
-	return res;
-}
