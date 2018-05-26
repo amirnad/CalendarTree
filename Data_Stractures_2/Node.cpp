@@ -1,16 +1,16 @@
 #include "Node.h"
 
-Node::Node(const treeKey &_min1, const treeKey &_min2, const treeKey &_min3, Node *_parent, Node *_leftChild, Node *_middleChild, Node *_rightChild) :
-	leftChild(_leftChild), rightChild(_rightChild), middleChild(_middleChild), parent(_parent), min1(_min1), min2(_min2), min3(_min3) {}
+Node::Node(treeKey i_Min1, treeKey i_Min2, treeKey i_Min3, Node* i_Parent, Node* i_LeftChild, Node* i_MiddleChild, Node* i_RightChild) :
+	m_LeftChild(i_LeftChild), m_RightChild(i_RightChild), m_MiddleChild(i_MiddleChild), m_Parent(i_Parent), m_Min1(i_Min1), m_Min2(i_Min2), m_Min3(i_Min3) {}
 
-Node::Node(Node *left, Node *middle)
+Node::Node(Node* i_LeftChild, Node* i_MiddleChild)
 { //sets a node with a left and a middle children
-	setLeftChild(left);
-	setMiddleChild(middle);
-	leftChild->setParent(this);
-	middleChild->setParent(this);
-	setNodeMin(leftChild);
-	setNodeMin(middleChild);
+	setLeftChild(i_LeftChild);
+	setMiddleChild(i_MiddleChild);
+	i_LeftChild->setParent(this);
+	i_MiddleChild->setParent(this);
+	setNodeMin(i_LeftChild);
+	setNodeMin(i_MiddleChild);
 }
 
 Node::~Node() {}
@@ -20,7 +20,7 @@ bool Node::isLeaf()
 {
 	bool isLeaf = false;
 
-	if ((leftChild == nullptr) && (middleChild == nullptr) && (rightChild == nullptr))
+	if ((m_LeftChild == nullptr) && (m_MiddleChild == nullptr) && (m_RightChild == nullptr))
 	{
 		isLeaf = true;
 	}
@@ -33,42 +33,30 @@ bool Node::isLeaf()
 }
 
 //Returns the min1\min2\min3
-int Node::getmin(int num)const
+treeKey Node::getMin(int i_WantedMin)
 {
-	switch (num)
+	switch (i_WantedMin)
 	{
 	case 1:
-		return min1;
+		return m_Min1;
 		break;
 	case 2:
-		return min2;
+		return m_Min2;
 		break;
 	case 3:
-		return min3;
+		return m_Min3;
 		break;
-	}
-}
-
-//Updates the parent of a node
-void Node::updateParnet()
-{
-	if (!isLeaf())
-	{
-		leftChild->setParent(this);
-		middleChild->setParent(this);
-		if (rightChild != nullptr)
-			rightChild->setParent(this);
 	}
 }
 
 //Check the number of children of a node
 int Node::checkNumOfChildren()
 {
-	if ((rightChild == nullptr) && (middleChild == nullptr) && (leftChild != nullptr))
+	if ((m_RightChild == nullptr) && (m_MiddleChild == nullptr) && (m_LeftChild != nullptr))
 	{
 		return ONE_CHILD;
 	}
-	else if ((rightChild == nullptr) && !(this->isLeaf()))
+	else if ((m_RightChild == nullptr) && !(this->isLeaf()))
 	{
 		return TWO_CHILD;
 	}
@@ -79,51 +67,51 @@ int Node::checkNumOfChildren()
 }
 
 //Gets a node and inserts it into a two children father
-void Node::insertToTwoChildNode(Node *nodeToInsert)
+void Node::insertToTwoChildNode(Node* i_EventToInsert)
 {
 	treeKey key;
 	//first getting the min value of the new node
-	if (nodeToInsert->isLeaf())
+	if (i_EventToInsert->isLeaf())
 	{
-		key = nodeToInsert->getKey();
+		key = i_EventToInsert->getKey();
 	}
 	else
 	{
-		key = nodeToInsert->getmin(1);
+		key = i_EventToInsert->getMin(1);
 	}
 	//find and insert in the correct place
-	if (key <= min1)
+	if (key <= m_Min1)
 	{
-		rightChild = middleChild;
-		middleChild = leftChild;
-		leftChild = nodeToInsert;
-		if (nodeToInsert->isLeaf())
+		m_RightChild = m_MiddleChild;
+		m_MiddleChild = m_LeftChild;
+		m_LeftChild = i_EventToInsert;
+		if (i_EventToInsert->isLeaf())
 		{
-			nodeToInsert->setNextBrother(middleChild);
-			nodeToInsert->setPrevBrother(middleChild->getPrevBrother());
-			middleChild->setPrevBrother(nodeToInsert);
+			i_EventToInsert->setNextBrother(m_MiddleChild);
+			i_EventToInsert->setPrevBrother(m_MiddleChild->getPrevBrother());
+			m_MiddleChild->setPrevBrother(i_EventToInsert);
 		}
 	}
-	else if (key <= min2)
+	else if (key <= m_Min2)
 	{
-		rightChild = middleChild;
-		middleChild = nodeToInsert;
-		if (nodeToInsert->isLeaf())
+		m_RightChild = m_MiddleChild;
+		m_MiddleChild = i_EventToInsert;
+		if (i_EventToInsert->isLeaf())
 		{
-			leftChild->setNextBrother(nodeToInsert);
-			nodeToInsert->setNextBrother(rightChild);
-			nodeToInsert->setPrevBrother(leftChild);
-			rightChild->setPrevBrother(nodeToInsert);
+			m_LeftChild->setNextBrother(i_EventToInsert);
+			i_EventToInsert->setNextBrother(m_RightChild);
+			i_EventToInsert->setPrevBrother(m_LeftChild);
+			m_RightChild->setPrevBrother(i_EventToInsert);
 		}
 	}
 	else
 	{
-		rightChild = nodeToInsert;
-		if (nodeToInsert->isLeaf())
+		m_RightChild = i_EventToInsert;
+		if (i_EventToInsert->isLeaf())
 		{
-			nodeToInsert->setPrevBrother(middleChild);
-			nodeToInsert->setNextBrother(middleChild->getNextBrother());
-			middleChild->setNextBrother(nodeToInsert);
+			i_EventToInsert->setPrevBrother(m_MiddleChild);
+			i_EventToInsert->setNextBrother(m_MiddleChild->getNextBrother());
+			m_MiddleChild->setNextBrother(i_EventToInsert);
 		}
 	}
 	
@@ -134,74 +122,75 @@ void Node::insertToTwoChildNode(Node *nodeToInsert)
 /*Dividing a node -  in case we want to insert a node into a 3 children node, we have to divide it first into 2 nodes of 2 children each
 					 First we will get the minimum , and then find the correct splitting place, create a new node with 2 values and update the values
 					 on the original node , so evetually we have 2 nodes with 2 children each*/
-Node* Node::divideNode(Node* nodeToInsert)
+Node* Node::divideNode(Node* i_EventToInsert)
 {
-	Node *res = nullptr;
-	treeKey childMin;
-	if (nodeToInsert->isLeaf())
+	Node* res = nullptr;
+	treeKey childKey;
+	if (i_EventToInsert->isLeaf())
 	{
-		childMin = nodeToInsert->getKey();
+		childKey = i_EventToInsert->getKey();
 	}
 	else
 	{
-		childMin = nodeToInsert->getmin(1);
+		childKey = i_EventToInsert->getMin(1);
 	}
 
-	if (childMin <= min1)
+	if (childKey <= m_Min1)
 	{
-		res = new Node(nodeToInsert, leftChild);
-		if (nodeToInsert->isLeaf())
+		res = new Node(i_EventToInsert, m_LeftChild);
+		if (i_EventToInsert->isLeaf())
 		{
-			nodeToInsert->setPrevBrother(leftChild->getPrevBrother());
-			nodeToInsert->setNextBrother(leftChild);
-			leftChild->setPrevBrother(nodeToInsert);
+			i_EventToInsert->setPrevBrother(m_LeftChild->getPrevBrother());
+			i_EventToInsert->setNextBrother(m_LeftChild);
+			m_LeftChild->setPrevBrother(i_EventToInsert);
 		}
-		orderNodeToLeft();
+		shiftNodeToLeft();
 	}
-	else if (childMin <= min2)
+	else if (childKey <= m_Min2)
 	{
-		res = new Node(leftChild, nodeToInsert);
-		if (nodeToInsert->isLeaf())
+		res = new Node(m_LeftChild, i_EventToInsert);
+		if (i_EventToInsert->isLeaf())
 		{
-			leftChild->setNextBrother(nodeToInsert);
-			middleChild->setPrevBrother(nodeToInsert);
-			nodeToInsert->setPrevBrother(leftChild);
-			nodeToInsert->setNextBrother(middleChild);
+			m_LeftChild->setNextBrother(i_EventToInsert);
+			m_MiddleChild->setPrevBrother(i_EventToInsert);
+			i_EventToInsert->setPrevBrother(m_LeftChild);
+			i_EventToInsert->setNextBrother(m_MiddleChild);
 		}
-		orderNodeToLeft();
+		shiftNodeToLeft();
 	}
-	else if (childMin <= min3)
+	else if (childKey <= m_Min3)
 	{
-		res = new Node(leftChild, middleChild);
-		if (nodeToInsert->isLeaf())
+		res = new Node(m_LeftChild, m_MiddleChild);
+		if (i_EventToInsert->isLeaf())
 		{
-			middleChild->setNextBrother(nodeToInsert);
-			rightChild->setPrevBrother(nodeToInsert);
-			nodeToInsert->setNextBrother(rightChild);
-			nodeToInsert->setPrevBrother(middleChild);
+			m_MiddleChild->setNextBrother(i_EventToInsert);
+			m_RightChild->setPrevBrother(i_EventToInsert);
+			i_EventToInsert->setNextBrother(m_RightChild);
+			i_EventToInsert->setPrevBrother(m_MiddleChild);
 		}
-		leftChild = nodeToInsert;
-		middleChild = rightChild;
+		m_LeftChild = i_EventToInsert;
+		m_MiddleChild = m_RightChild;
 	}
 	else
 	{
-		res = new Node(leftChild, middleChild);
-		if (nodeToInsert->isLeaf())
+		res = new Node(m_LeftChild, m_MiddleChild);
+		if (i_EventToInsert->isLeaf())
 		{
-			nodeToInsert->setNextBrother(rightChild->getNextBrother());
-			nodeToInsert->setPrevBrother(rightChild);
-			rightChild->setNextBrother(nodeToInsert);
+			i_EventToInsert->setNextBrother(m_RightChild->getNextBrother());
+			i_EventToInsert->setPrevBrother(m_RightChild);
+			m_RightChild->setNextBrother(i_EventToInsert);
 		}
-		leftChild = rightChild;
-		middleChild = nodeToInsert;
-		rightChild = nullptr;
+		m_LeftChild = m_RightChild;
+		m_MiddleChild = i_EventToInsert;
+		m_RightChild = nullptr;
 	}
 
-	rightChild = nullptr;
+	m_RightChild = nullptr;
 	this->fixParent();
 	res->fixParent();
 	this->fixMins();
 	res->fixMins();
+	
 	return res;
 }
 
@@ -215,103 +204,61 @@ void Node::fixParent()
 		this->getRightChild()->setParent(this);
 }
 
-//fix all the minimum values of a node
-void Node::fixMins()
-{
-	if (!isLeaf())
-	{
-		min1 = setNodeMin(this->getLeftChild());
-		min2 = setNodeMin(this->getMiddleChild());
-		min3 = setNodeMin(this->getRightChild());
-	}
-
-}
-
-int Node::setNodeMin(Node* nodeToSet)
-{
-	int min = -1;
-	if (nodeToSet != nullptr)
-	{
-
-		if (nodeToSet->isLeaf())
-		{
-			min = nodeToSet->getKey();
-		}
-		else
-		{
-			min = nodeToSet->getmin(1);
-		}
-	}
-	return min;
-}
-
-//shift node children left
-void Node::orderNodeToLeft()
-{
-	leftChild = middleChild;
-	middleChild = rightChild;
-	rightChild = nullptr;
-}
-
-//shift node children right
-void Node::orderNodeToRight()
-{
-	rightChild = middleChild;
-	middleChild = leftChild;
-	leftChild = nullptr;
-}
-
 //delete a child from a three children node
-void Node::deleteNodeFromThree(Node *delNode)
+void Node::deleteNodeFromThree(Node* i_WantedEventToDelete)
 {
-	if (delNode == leftChild)
+	if (i_WantedEventToDelete == m_LeftChild)
 	{
-		delete delNode;
-		leftChild = middleChild;
-		middleChild = rightChild;
-		min1 = min2;
-		min2 = min3;
+		delete i_WantedEventToDelete;
+		m_LeftChild = m_MiddleChild;
+		m_MiddleChild = m_RightChild;
+		m_Min1 = m_Min2;
+		m_Min2 = m_Min3;
 	}
-	else if (delNode == middleChild)
+	else if (i_WantedEventToDelete == m_MiddleChild)
 	{
-		delete delNode;
-		middleChild = rightChild;
-		min2 = min3;
+		delete i_WantedEventToDelete;
+		m_MiddleChild = m_RightChild;
+		m_Min2 = m_Min3;
 	}
 	else
-		delete delNode;
+	{
+		delete i_WantedEventToDelete;
+	}
 
-	min3 = -1;
-	rightChild = nullptr;
+	m_Min3 = -1;
+	m_RightChild = nullptr;
 }
 
 //delete a child from a 2 children node
-void Node::deleteNodeFromTwo(Node *delNode)
+void Node::deleteNodeFromTwo(Node* i_WantedEventToDelete)
 {
-	if (delNode == leftChild)
+	if (i_WantedEventToDelete == m_LeftChild)
 	{
-		delete delNode;
-		leftChild = middleChild;
+		delete i_WantedEventToDelete;
+		m_LeftChild = m_MiddleChild;
 	}
 	else
-		delete middleChild;
+	{
+		delete m_MiddleChild;
+	}
 
-	middleChild = nullptr;
-	min2 = -1;
+	m_MiddleChild = nullptr;
+	m_Min2 = -1;
 }
 
 //inspects which child is the node
-int Node::whichAmI()
+int Node::findChildPlace()
 {
-	if (this == parent->getLeftChild())
+	if (this == m_Parent->getLeftChild())
 	{
 		return LEFT;
 	}
-	else if (this == parent->getMiddleChild())
+	else if (this == m_Parent->getMiddleChild())
 	{
 		return MIDDLE;
 	}
-	else if (this == parent->getRightChild())
+	else if (this == m_Parent->getRightChild())
 	{
 		return RIGHT;
 	}
@@ -321,12 +268,73 @@ int Node::whichAmI()
 	}
 }
 
-void Node::setNextBrother(Node* _nextBrother)
+//fix all the minimum values of a node
+void Node::fixMins()
 {
-	this->nextBrother = _nextBrother;
+	if (!isLeaf())
+	{
+		setMin(1, m_LeftChild);
+		setMin(2, m_MiddleChild);
+		setMin(3, m_RightChild);
+	}
 }
 
-void Node::setPrevBrother(Node* _prevBrother)
+int Node::setNodeMin(Node* i_NodeToSet)
 {
-	this->prevBrother = _prevBrother;
+	int min = -1;
+	if (i_NodeToSet != nullptr)
+	{
+
+		if (i_NodeToSet->isLeaf())
+		{
+			min = i_NodeToSet->getKey();
+		}
+		else
+		{
+			min = i_NodeToSet->getMin(1);
+		}
+	}
+
+	return min;
+}
+
+void Node::setMin(int i_WantedMin, Node* i_GetMinFrom)
+{
+	if (i_GetMinFrom != nullptr)
+	{
+		if (i_GetMinFrom->isLeaf())
+		{
+			switch (i_WantedMin)
+			{
+			case 1:
+				m_Min1 = i_GetMinFrom->getKey();
+				break;
+
+			case 2:
+				m_Min2 = i_GetMinFrom->getKey();;
+				break;
+
+			case 3:
+				m_Min3 = i_GetMinFrom->getKey();;
+				break;
+			}
+		}
+		else
+		{
+			switch (i_WantedMin)
+			{
+			case 1:
+				m_Min1 = i_GetMinFrom->getMin(1);
+				break;
+
+			case 2:
+				m_Min2 = i_GetMinFrom->getMin(1);
+				break;
+
+			case 3:
+				m_Min3 = i_GetMinFrom->getMin(1);
+				break;
+			}
+		}
+	}
 }
