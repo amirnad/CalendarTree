@@ -4,23 +4,16 @@ Node::Node(const treeKey &_min1, const treeKey &_min2, const treeKey &_min3, Nod
 	leftChild(_leftChild), rightChild(_rightChild), middleChild(_middleChild), parent(_parent), min1(_min1), min2(_min2), min3(_min3) {}
 
 Node::Node(Node *left, Node *middle)
-{
+{ //sets a node with a left and a middle children
 	setLeftChild(left);
 	setMiddleChild(middle);
 	leftChild->setParent(this);
 	middleChild->setParent(this);
-	fixMins();
+	setNodeMin(leftChild);
+	setNodeMin(middleChild);
 }
 
 Node::~Node() {}
-
-//Turns node into a leaf
-void Node::makeLeaf()
-{
-	leftChild = nullptr;
-	middleChild = nullptr;
-	rightChild = nullptr;
-}
 
 //Checks if a node is a leaf
 bool Node::isLeaf()
@@ -85,9 +78,11 @@ int Node::checkNumOfChildren()
 	}
 }
 
+//Gets a node and inserts it into a two children father
 void Node::insertToTwoChildNode(Node *nodeToInsert)
 {
 	treeKey key;
+	//first getting the min value of the new node
 	if (nodeToInsert->isLeaf())
 	{
 		key = nodeToInsert->getKey();
@@ -96,116 +91,49 @@ void Node::insertToTwoChildNode(Node *nodeToInsert)
 	{
 		key = nodeToInsert->getmin(1);
 	}
+	//find and insert in the correct place
+	if (key <= min1)
+	{
+		rightChild = middleChild;
+		middleChild = leftChild;
+		leftChild = nodeToInsert;
+		if (nodeToInsert->isLeaf())
+		{
+			nodeToInsert->setNextBrother(middleChild);
+			nodeToInsert->setPrevBrother(middleChild->getPrevBrother());
+			middleChild->setPrevBrother(nodeToInsert);
+		}
+	}
+	else if (key <= min2)
+	{
+		rightChild = middleChild;
+		middleChild = nodeToInsert;
+		if (nodeToInsert->isLeaf())
+		{
+			leftChild->setNextBrother(nodeToInsert);
+			nodeToInsert->setNextBrother(rightChild);
+			nodeToInsert->setPrevBrother(leftChild);
+			rightChild->setPrevBrother(nodeToInsert);
+		}
+	}
+	else
+	{
+		rightChild = nodeToInsert;
+		if (nodeToInsert->isLeaf())
+		{
+			nodeToInsert->setPrevBrother(middleChild);
+			nodeToInsert->setNextBrother(middleChild->getNextBrother());
+			middleChild->setNextBrother(nodeToInsert);
+		}
+	}
 	
-
-
-		if (key <= min1)
-		{
-			rightChild = middleChild;
-			middleChild = leftChild;
-			leftChild = nodeToInsert;
-			if (nodeToInsert->isLeaf())
-			{
-				nodeToInsert->setNextBrother(middleChild);
-				nodeToInsert->setPrevBrother(middleChild->getPrevBrother());
-				middleChild->setPrevBrother(nodeToInsert);
-			}
-		}
-		else if (key <= min2)
-		{
-			rightChild = middleChild;
-			middleChild = nodeToInsert;
-			if (nodeToInsert->isLeaf())
-			{
-				leftChild->setNextBrother(nodeToInsert);
-				nodeToInsert->setNextBrother(rightChild);
-				nodeToInsert->setPrevBrother(leftChild);
-				rightChild->setPrevBrother(nodeToInsert);
-			}
-		}
-		else
-		{
-			rightChild = nodeToInsert;
-			if (nodeToInsert->isLeaf())
-			{
-				nodeToInsert->setPrevBrother(middleChild);
-				nodeToInsert->setNextBrother(middleChild->getNextBrother());
-				middleChild->setNextBrother(nodeToInsert);
-			}
-		}
-	
-
-
 	fixMins();
 	fixParent();
 }
 
-////puts a new node into a parents that holds only 2 children
-//void Node::insertToTwoChildNode(Node *newChildToInsert)
-//{
-//	if (newChildToInsert->isLeaf()) //in case newChild is leaf node we only need to find its right place and insert it
-//	{
-//		if (newChildToInsert->getKey() > min2) //updating the pointers and min values of the parent
-//		{
-//			rightChild = newChildToInsert;
-//			newChildToInsert->setPrevBrother(middleChild);
-//			newChildToInsert->setNextBrother(middleChild->getNextBrother());
-//			middleChild->getNextBrother()->setPrevBrother(newChildToInsert);
-//			min3 = newChildToInsert->getKey();
-//		}
-//		else if (newChildToInsert->getKey() > min1)
-//		{
-//			rightChild = middleChild;
-//			middleChild = newChildToInsert;
-//			min3 = min2;
-//			leftChild->setNextBrother(newChildToInsert);
-//			newChildToInsert->setPrevBrother(leftChild);
-//			newChildToInsert->setNextBrother(rightChild);
-//			rightChild->setPrevBrother(newChildToInsert);
-//			min2 = newChildToInsert->getKey();
-//		}
-//		else
-//		{
-//			rightChild = middleChild;
-//			middleChild = leftChild;
-//			leftChild = newChildToInsert;
-//			newChildToInsert->setNextBrother(middleChild);
-//			newChildToInsert->setPrevBrother(middleChild->getPrevBrother());
-//			middleChild->setPrevBrother(newChildToInsert);
-//			min3 = min2;
-//			min2 = min1;
-//			min1 = newChildToInsert->getKey();
-//		}
-//	}
-//	else //newChild is not a leaf but an internal node
-//	{
-//		if (newChildToInsert->getmin(1) <= min1)
-//		{
-//			rightChild = middleChild;
-//			middleChild = leftChild;
-//			leftChild = newChildToInsert;
-//			min3 = rightChild->getmin(1);
-//			min2 = middleChild->getmin(1);
-//			min1 = newChildToInsert->getmin(1);
-//
-//		}
-//		else if (newChildToInsert->getmin(1) <= min2)
-//		{
-//			rightChild = middleChild;
-//			middleChild = newChildToInsert;
-//			min3 = rightChild->getmin(1);
-//			min2 = newChildToInsert->getmin(1);
-//		}
-//		else
-//		{
-//			rightChild = newChildToInsert;
-//			min3 = newChildToInsert->getmin(1);
-//		}
-//	}
-//	newChildToInsert->setParent(this);
-//}
-
-
+/*Dividing a node -  in case we want to insert a node into a 3 children node, we have to divide it first into 2 nodes of 2 children each
+					 First we will get the minimum , and then find the correct splitting place, create a new node with 2 values and update the values
+					 on the original node , so evetually we have 2 nodes with 2 children each*/
 Node* Node::divideNode(Node* nodeToInsert)
 {
 	Node *res = nullptr;
@@ -287,6 +215,7 @@ void Node::fixParent()
 		this->getRightChild()->setParent(this);
 }
 
+//fix all the minimum values of a node
 void Node::fixMins()
 {
 	if (!isLeaf())
@@ -316,7 +245,7 @@ int Node::setNodeMin(Node* nodeToSet)
 	return min;
 }
 
-
+//shift node children left
 void Node::orderNodeToLeft()
 {
 	leftChild = middleChild;
@@ -324,6 +253,7 @@ void Node::orderNodeToLeft()
 	rightChild = nullptr;
 }
 
+//shift node children right
 void Node::orderNodeToRight()
 {
 	rightChild = middleChild;
@@ -331,6 +261,7 @@ void Node::orderNodeToRight()
 	leftChild = nullptr;
 }
 
+//delete a child from a three children node
 void Node::deleteNodeFromThree(Node *delNode)
 {
 	if (delNode == leftChild)
@@ -354,6 +285,7 @@ void Node::deleteNodeFromThree(Node *delNode)
 	rightChild = nullptr;
 }
 
+//delete a child from a 2 children node
 void Node::deleteNodeFromTwo(Node *delNode)
 {
 	if (delNode == leftChild)
@@ -368,6 +300,7 @@ void Node::deleteNodeFromTwo(Node *delNode)
 	min2 = -1;
 }
 
+//inspects which child is the node
 int Node::whichAmI()
 {
 	if (this == parent->getLeftChild())

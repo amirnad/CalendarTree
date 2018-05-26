@@ -20,7 +20,6 @@ public:
 	string getDescription() { return description; }
 	void print(); // "print" the event to cout
 	bool isEventStillHappening(time_t requestedTime);
-	bool isEventInRange(time_t requestedTime);
 };
 
 #endif
