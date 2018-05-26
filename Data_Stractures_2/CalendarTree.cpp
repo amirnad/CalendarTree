@@ -616,17 +616,62 @@ Node* CalendarTree::organizeTree(Node* node, Node* parent)
 
 bool CalendarTree::isInsertLegal(CalendarEvent* eventToInsert)
 {
-	bool isLegal = true;
+	bool isLegal = false;
 
 	treeKey newEventStartTime = eventToInsert->getStartTime();
 	treeKey newEventEndTime = newEventStartTime + eventToInsert->getDuration();
-	Node* currLeaf = Find(newEventStartTime);
-	treeKey currEventEndTime;
-	if (currLeaf != nullptr)
+
+	Node* existEvent = Find(newEventStartTime);
+	if (existEvent == nullptr)
 	{
-		if (currLeaf->getData()->isWithinBounds(newEventStartTime, newEventEndTime))
+		isLegal = true;
+	}
+	else
+	{
+		time_t existEventStartTime = existEvent->getData()->getStartTime();
+		time_t existEventEndTime = existEvent->getData()->getDuration() + existEventStartTime;
+	
+		if (newEventStartTime <= existEventStartTime)
 		{
-			isLegal = false;
+			if (newEventEndTime <= existEventStartTime)
+			{
+				Node* prevExistEvent = existEvent->getPrevBrother();
+				if (prevExistEvent == nullptr)
+				{
+					isLegal = true;
+				}
+				else
+				{
+					time_t prevExistEventStartTime = prevExistEvent->getData()->getStartTime();
+					time_t prevExistEventEndTime = prevExistEvent->getData()->getDuration() + prevExistEventStartTime;
+
+					if (prevExistEventEndTime <= newEventStartTime)
+						isLegal = true;
+					else
+						isLegal = false;
+				}
+			}
+		}
+		else
+		{
+			if (newEventStartTime >= existEventEndTime)
+			{
+				Node* nextExistEvent = existEvent->getNextBrother();
+				if (nextExistEvent == nullptr)
+				{
+					isLegal = true;
+				}
+				else 
+				{
+					time_t nextExistEventStartTime = nextExistEvent->getData()->getStartTime();
+					time_t nextExistEventEndTime = nextExistEvent->getData()->getDuration() + nextExistEventStartTime;
+
+					if (nextExistEventStartTime >= newEventEndTime)
+						isLegal = true;
+					else
+						isLegal = false;
+				}
+			}
 		}
 	}
 	return isLegal;
